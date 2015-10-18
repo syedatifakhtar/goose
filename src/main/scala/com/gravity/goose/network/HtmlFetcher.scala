@@ -18,6 +18,9 @@
 
 package com.gravity.goose.network
 
+import com.gargoylesoftware.htmlunit.BrowserVersion
+import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser
+import com.syedatifakhtar.CustomHTMLUnitDriver
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.HttpVersion
@@ -49,6 +52,9 @@ import java.util.List
 import com.gravity.goose.utils.Logging
 import com.gravity.goose.Configuration
 import org.apache.http.impl.client.{DefaultHttpRequestRetryHandler, AbstractHttpClient, DefaultHttpClient}
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.htmlunit.HtmlUnitDriver
 
 
 /**
@@ -60,7 +66,11 @@ import org.apache.http.impl.client.{DefaultHttpRequestRetryHandler, AbstractHttp
  * contain up to 1GB of text that is just wasted resources so we set a max bytes level on how much content we're going
  * to try and pull back before we say screw it.
  */
-object HtmlFetcher extends AbstractHtmlFetcher with Logging {
+object HtmlFetcher extends AbstractHtmlFetcher with Logging{
+
+  val webDriver: WebDriver = new CustomHTMLUnitDriver(BrowserVersion.FIREFOX_38,true)
+
+
   /**
    * holds a reference to our override cookie store, we don't want to store
    * cookies for head requests, only slows shit down
@@ -105,6 +115,7 @@ object HtmlFetcher extends AbstractHtmlFetcher with Logging {
     try {
       val localContext: HttpContext = new BasicHttpContext
       localContext.setAttribute(ClientContext.COOKIE_STORE, HtmlFetcher.emptyCookieStore)
+
       httpget = new HttpGet(cleanUrl)
       HttpProtocolParams.setUserAgent(httpClient.getParams, config.getBrowserUserAgent());
 
@@ -120,119 +131,10 @@ object HtmlFetcher extends AbstractHtmlFetcher with Logging {
         case _ =>
       }
 
-      entity = response.getEntity
-      if (entity != null) {
-        instream = entity.getContent
-        var encodingType: String = "UTF-8"
-        try {
-          encodingType = EntityUtils.getContentCharSet(entity)
-          if (encodingType == null) {
-            encodingType = "UTF-8"
-          }
-        }
-        catch {
-          case e: Exception => {
-            if (logger.isDebugEnabled) {
-              trace("Unable to get charset for: " + cleanUrl)
-              trace("Encoding Type is: " + encodingType)
-            }
-          }
-        }
-        try {
-          htmlResult = HtmlFetcher.convertStreamToString(instream, 15728640, encodingType).trim
-        }
-        finally {
-          EntityUtils.consume(entity)
-        }
-      }
-      else {
-        trace("Unable to fetch URL Properly: " + cleanUrl)
-      }
+      webDriver.get(cleanUrl)
+      println("Fetched the page:" + cleanUrl + "and now we wait")
+      return Some(webDriver.getPageSource)
     }
-    catch {
-      case e: NullPointerException => {
-        logger.warn(e.toString + " " + e.getMessage + " Caught for URL: " + cleanUrl)
-      }
-      case e: MaxBytesException => {
-        trace("GRVBIGFAIL: " + cleanUrl + " Reached max bytes size")
-        throw e
-      }
-      case e: SocketException => {
-        logger.warn(e.getMessage + " Caught for URL: " + cleanUrl)
-      }
-      case e: SocketTimeoutException => {
-        trace(e.toString)
-      }
-      case e: LoggableException => {
-        logger.warn(e.getMessage)
-        return None
-      }
-      case e: Exception => {
-        trace("FAILURE FOR LINK: " + cleanUrl + " " + e.toString)
-        return None
-      }
-    }
-    finally {
-      if (instream != null) {
-        try {
-          instream.close()
-        }
-        catch {
-          case e: Exception => {
-            logger.warn(e.getMessage + " Caught for URL: " + cleanUrl)
-          }
-        }
-      }
-      if (httpget != null) {
-        try {
-          httpget.abort()
-          entity = null
-        }
-        catch {
-          case e: Exception => {
-          }
-        }
-      }
-    }
-    if (logger.isDebugEnabled) {
-      logger.debug("starting...")
-    }
-    if (htmlResult == null || htmlResult.length < 1) {
-      if (logger.isDebugEnabled) {
-        logger.debug("HTMLRESULT is empty or null")
-      }
-      throw new NotHtmlException(cleanUrl)
-    }
-    var is: InputStream = null
-    var mimeType: String = null
-    try {
-      is = new ByteArrayInputStream(htmlResult.getBytes("UTF-8"))
-      mimeType = URLConnection.guessContentTypeFromStream(is)
-      if (mimeType != null) {
-        if ((mimeType == "text/html") == true || (mimeType == "application/xml") == true) {
-          return Some(htmlResult)
-        }
-        else {
-          if (htmlResult.contains("<title>") == true && htmlResult.contains("<p>") == true) {
-            return Some(htmlResult)
-          }
-          trace("GRVBIGFAIL: " + mimeType + " - " + cleanUrl)
-          throw new NotHtmlException(cleanUrl)
-        }
-      }
-      else {
-        throw new NotHtmlException(cleanUrl)
-      }
-    }
-    catch {
-      case e: UnsupportedEncodingException => {
-        logger.warn(e.getMessage + " Caught for URL: " + cleanUrl)
-      }
-      case e: IOException => {
-        logger.warn(e.getMessage + " Caught for URL: " + cleanUrl)
-      }
-    }
-    None
   }
 
   private def initClient() {
