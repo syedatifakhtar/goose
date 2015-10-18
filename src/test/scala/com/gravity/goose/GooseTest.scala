@@ -2,14 +2,6 @@ package com.gravity.goose
 
 import org.junit.Test
 import org.junit.Assert._
-import scala.actors.Future
-import scala.actors.Futures._
-
-/**
- * Created by Jim Plush
- * User: jim
- * Date: 8/14/11
- */
 
 class GooseTest {
 
@@ -35,24 +27,24 @@ class GooseTest {
 
   }
 
-  @Test
-  def badlink() {
-    implicit val config = new Configuration
-    val url = "http://nolove888.com/2011/08/13/LINKNOTEXISTS"
-    val goose = new Goose(config)
-    val article = goose.extractContent(url)
-    assertNull(article.topNode)
-  }
+//  @Test(expected = Exception.class)
+//  def badlink() {
+//    implicit val config = new Configuration
+//    val url = "http://nolove888.com/2011/08/13/LINKNOTEXISTS"
+//    val goose = new Goose(config)
+//    val article = goose.extractContent(url)
+//    assertNull(article.topNode)
+//  }
 
-  @Test
-  def extractJSPageSource(): Unit = {
-    implicit val config = new Configuration
-    val url = "http://www.wired.com/2015/04/the-apple-watch/"
-    val goose = new Goose(config)
-    val article = goose.extractContent(url)
-    println( "Article Meta: " + article.metaKeywords )
-    println( "Article Text: " + article.cleanedArticleText )
-    println( "Article Add: " + article.additionalData )
-  }
+//  @Test
+//  def extractJSPageSource(): Unit = {
+//    implicit val config = new Configuration
+//    val url = "http://www.wired.com/2015/04/the-apple-watch/"
+//    val goose = new Goose(config)
+//    val article = goose.extractContent(url)
+//    println( "Article Meta: " + article.metaKeywords )
+//    println( "Article Text: " + article.cleanedArticleText )
+//    println( "Article Add: " + article.additionalData )
+//  }
 
 }
