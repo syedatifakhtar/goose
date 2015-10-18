@@ -12,6 +12,7 @@ herokuAppName in Compile := "custom-goose-7788"
 
 resolvers += "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
 
+
 libraryDependencies ++= Seq(
   "org.seleniumhq.selenium" % "selenium-java" % "2.48.2",
   "junit" % "junit" % "4.8.1" % "test",
