@@ -1,17 +1,27 @@
+import play.PlayImport._
+import play.PlayScala
+
+
 organization := "com.syedatifakhtar"
 
-name := "CustomGoose"
+name := "custom-goose-7788"
 
 version := "0.1.0-SNAPSHOT"
 
-scalaVersion := "2.9.1"
+scalaVersion := "2.11.0"
 
 herokuJdkVersion in Compile := "1.7"
 
 herokuAppName in Compile := "custom-goose-7788"
 
-resolvers += "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
+resolvers ++= Seq(
+  "Atlassian Releases" at "https://maven.atlassian.com/public/",
+  "JCenter repo" at "https://bintray.com/bintray/jcenter/",
+  "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/",
+  "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
+)
 
 libraryDependencies ++= Seq(
   "org.seleniumhq.selenium" % "selenium-java" % "2.48.2",
