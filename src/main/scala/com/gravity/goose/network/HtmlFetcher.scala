@@ -132,7 +132,8 @@ object HtmlFetcher extends AbstractHtmlFetcher with Logging{
       }
 
       webDriver.get(cleanUrl)
-      println("Fetched the page:" + cleanUrl + "and now we wait")
+      println("Fetched the page:" + cleanUrl + " and now we wait")
+      println("Source: \n" + webDriver.getPageSource)
       return Some(webDriver.getPageSource)
     }
   }

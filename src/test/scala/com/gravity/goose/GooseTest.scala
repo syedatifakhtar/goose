@@ -36,15 +36,15 @@ class GooseTest {
 //    assertNull(article.topNode)
 //  }
 
-//  @Test
-//  def extractJSPageSource(): Unit = {
-//    implicit val config = new Configuration
-//    val url = "http://www.wired.com/2015/04/the-apple-watch/"
-//    val goose = new Goose(config)
-//    val article = goose.extractContent(url)
-//    println( "Article Meta: " + article.metaKeywords )
-//    println( "Article Text: " + article.cleanedArticleText )
-//    println( "Article Add: " + article.additionalData )
-//  }
+  @Test
+  def extractJSPageSource(): Unit = {
+    implicit val config = new Configuration
+    val url = "https://www.quora.com/Natural-Language-Processing/Where-can-I-find-a-free-offline-summarization-tool"
+    val goose = new Goose(config)
+    val article = goose.extractContent(url)
+    println( "Article Meta: " + article.metaKeywords )
+    println( "Article Text: " + article.cleanedArticleText )
+    println( "Article Add: " + article.additionalData )
+  }
 
 }
